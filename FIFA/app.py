@@ -1,30 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import pandas as pd
-
-df = pd.read_csv('C://Users//HP//Datasets//fifa_world_cup_2026_player_performance.csv')  # adjust to your actual file name/path
-
-print(df.columns.tolist())   # shows all column names
-print(df.head())              # shows first 5 rows so I can see the actual structure
-
-
-# In[1]:
-
-
 import pandas as pd
 import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 
-df = pd.read_csv('fifa_world_cup_2026_player_performance.csv')  # adjust filename/path as needed
+df = pd.read_csv('fifa_world_cup_2026_player_performance.csv')
 
-# Tournament-level columns (total_goals_tournament, tournament_rating, etc.) repeat
-# on every match-row for a player. Summing/averaging the raw df would multiply each
-# player's totals by however many matches they played. We keep only the first row
-# per player, since tournament totals are identical across all of that player's rows.
 player_df = df.drop_duplicates(subset='player_id', keep='first')[
     ['player_id', 'player_name', 'team', 'position', 'nationality',
      'total_goals_tournament', 'total_assists_tournament',
@@ -35,8 +14,6 @@ player_df = df.drop_duplicates(subset='player_id', keep='first')[
 
 teams = sorted(player_df['team'].unique())
 
-# Team-level comparison doesn't depend on any filter, so it's computed once here
-# rather than recomputed on every dropdown change inside a callback.
 team_stats = player_df.groupby('team').agg(
     avg_rating=('tournament_rating', 'mean'),
     total_goals=('total_goals_tournament', 'sum'),
@@ -58,6 +35,7 @@ team_goals_fig = px.bar(
 )
 
 app = Dash(__name__)
+server = app.server
 
 app.layout = html.Div([
 
@@ -121,24 +99,7 @@ def update_player_comparison(selected_team):
     return rating_fig, goals_assists_fig
 
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True, port=8054)
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))
