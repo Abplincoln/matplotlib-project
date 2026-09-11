@@ -1,17 +1,12 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 import pandas as pd
 import plotly.express as px
 from dash import Dash, dcc, html, Input, Output
 
-df = pd.read_csv("C://Users//HP//Datasets//StudentsPerformance.csv") # adjust filename/path as needed
+df = pd.read_csv("StudentsPerformance.csv")
 df['average_performance'] = (df['math score'] + df['reading score'] + df['writing score']) / 3
 
 app = Dash(__name__)
+server = app.server
 
 app.layout = html.Div([
 
@@ -85,7 +80,6 @@ def update_dashboard(selected_gender, selected_lunch, selected_prep):
         'textAlign': 'center', 'width': '20%', 'boxShadow': '2px 2px 8px rgba(0,0,0,0.1)'
     }
 
-    # empty filter combo -> mean() on an empty series is NaN, which renders as "nan" on the card
     def safe_mean(series):
         return series.mean() if not series.empty else 0.0
 
@@ -119,12 +113,7 @@ def update_dashboard(selected_gender, selected_lunch, selected_prep):
     return kpis, gender_fig, scatter_fig, box_fig
 
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True, port=8053)
-
-
-# In[ ]:
-
-
-
-
+    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8050)))
